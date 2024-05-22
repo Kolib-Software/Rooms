@@ -11,7 +11,7 @@
     <PackageVersion>3.0.0</PackageVersion>
     <Authors>Kolib Software</Authors>
     <Copyright>Kolib Software</Copyright>
-    <RepositoryUrl>https://github.com/KolibSoft/Rooms</RepositoryUrl>
+    <RepositoryUrl>https://github.com/Kolib-Software/Rooms</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>logo.png</PackageIcon>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

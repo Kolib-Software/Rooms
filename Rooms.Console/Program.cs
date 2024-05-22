@@ -137,11 +137,11 @@ static async Task ServerHandshake(RoomServer server, IRoomStream stream)
 static async Task ClientHandshake(RoomClient client, IRoomStream stream, string? options = null)
 {
     Console.WriteLine($"Configuring connection");
-    using var file = options != null && File.Exists(options) ? new FileStream(options, FileMode.Open, FileAccess.Read) : Stream.Null;
+    using var _options = options != null && File.Exists(options) ? new FileStream(options, FileMode.Open, FileAccess.Read) : await RoomContentUtils.CreateAsTextAsync("{}");
     await stream.WriteMessageAsync(new RoomMessage
     {
         Verb = "OPTIONS",
-        Content = file
+        Content = _options
     });
     var message = await stream.ReadMessageAsync();
     if (message.Verb != "OPTIONS" || message.Channel != 0)
