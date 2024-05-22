@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Rooms</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <script src='main.js' type="module"></script>
+</head>
+
+<body>
+
+    <h1>Rooms</h1>
+
+    <div>
+        <h2>Room Server</h2>
+        <input id="iServer" placeholder="Server" />
+    </div>
+
+    <div>
+        <h2>Room List</h2>
+        <input id="iHint" placeholder="Hint" maxlength="128" />
+        <input id="iRefresh" type="button" value="Refresh" />
+        <div id="dList"></div>
+    </div>
+
+    <div>
+        <h2>Join Room</h2>
+        <input id="iName" placeholder="Name" maxlength="64" />
+        <input id="iTag" placeholder="Tag" maxlength="128" />
+        <input id="iPassword" placeholder="Password" maxlength="32" />
+        <input id="iSlots" placeholder="Slots" type="number" min="1" max="16" />
+        <input id="iJoin" type="button" value="Join" />
+    </div>
+
+    <div>
+        <h2>Room Service</h2>
+        <textarea id="tLog" readonly></textarea>
+        <input id="iCommand" placeholder="&lt;VERB&gt; &lt;CHANNEL&gt; [CONTENT]" />
+    </div>
+
+</body>
+
+</html>
