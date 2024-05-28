@@ -7,15 +7,41 @@ using KolibSoft.Rooms.Core.Protocol;
 
 namespace KolibSoft.Rooms.Core.Streams
 {
+
+    /// <summary>
+    /// Generic base implementation of a Room stream.
+    /// </summary>
     public abstract class RoomStream : IRoomStream
     {
 
+        /// <summary>
+        /// Stream options.
+        /// </summary>
         public RoomStreamOptions Options { get; private set; } = new RoomStreamOptions();
+
+        /// <summary>
+        /// Checks if the stream is ready for read or write messages.
+        /// </summary>
         public abstract bool IsAlive { get; }
+
+        /// <summary>
+        /// Checks if the instance was disposed.
+        /// </summary>
         protected bool IsDisposed => _disposed;
 
+        /// <summary>
+        /// Read a chunk of data from the underline implementation.
+        /// </summary>
+        /// <param name="buffer">Chunk to store the read data.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>Amount of bytes read.</returns>
         protected abstract ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken token = default);
 
+        /// <summary>
+        /// Get the next available chunk of data for read operations.
+        /// </summary>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>Available chunk or `default` otherwise.</returns>
         private async ValueTask<ReadOnlyMemory<byte>> GetChunkAsync(CancellationToken token = default)
         {
             if (_position == _length)
@@ -29,6 +55,12 @@ namespace KolibSoft.Rooms.Core.Streams
             return slice;
         }
 
+        /// <summary>
+        /// Read a verb.
+        /// </summary>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>Room verb.</returns>
+        /// <exception cref="IOException"></exception>
         private async ValueTask<RoomVerb> ReadVerbAsync(CancellationToken token)
         {
             _data.SetLength(0);
@@ -61,6 +93,12 @@ namespace KolibSoft.Rooms.Core.Streams
             }
         }
 
+        /// <summary>
+        /// Read a channel.
+        /// </summary>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>Room channel.</returns>
+        /// <exception cref="IOException"></exception>
         private async ValueTask<RoomChannel> ReadChannelAsync(CancellationToken token)
         {
             _data.SetLength(0);
@@ -95,6 +133,12 @@ namespace KolibSoft.Rooms.Core.Streams
             }
         }
 
+        /// <summary>
+        /// Read a count.
+        /// </summary>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>Room count.</returns>
+        /// <exception cref="IOException"></exception>
         private async ValueTask<RoomCount> ReadCountAsync(CancellationToken token)
         {
             _data.SetLength(0);
@@ -127,6 +171,12 @@ namespace KolibSoft.Rooms.Core.Streams
             }
         }
 
+        /// <summary>
+        /// Read a content.
+        /// </summary>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>Room content.</returns>
+        /// <exception cref="IOException"></exception>
         private async ValueTask<Stream> ReadContentAsync(CancellationToken token)
         {
             var count = await ReadCountAsync(token);
@@ -148,6 +198,12 @@ namespace KolibSoft.Rooms.Core.Streams
             return content;
         }
 
+        /// <summary>
+        /// Read a message.
+        /// </summary>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>Room message.</returns>
+        /// <exception cref="ObjectDisposedException"></exception>
         public async ValueTask<RoomMessage> ReadMessageAsync(CancellationToken token = default)
         {
             if (_disposed) throw new ObjectDisposedException(nameof(RoomStream));
@@ -163,8 +219,21 @@ namespace KolibSoft.Rooms.Core.Streams
             return message;
         }
 
+        /// <summary>
+        /// Write a chunk of data into the underline implementation.
+        /// </summary>
+        /// <param name="buffer">Chunk data to write.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>Amount of bytes written.</returns>
         protected abstract ValueTask<int> WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken token);
 
+        /// <summary>
+        /// Write a verb.
+        /// </summary>
+        /// <param name="verb">Room verb.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns></returns>
+        /// <exception cref="IOException"></exception>
         private async ValueTask WriteVerbAsync(RoomVerb verb, CancellationToken token)
         {
             if (verb.Length > Options.MaxVerbLength) throw new IOException("Room verb too large");
@@ -178,6 +247,13 @@ namespace KolibSoft.Rooms.Core.Streams
             await WriteAsync(Blank, token);
         }
 
+        /// <summary>
+        /// Write a channel.
+        /// </summary>
+        /// <param name="channel">Room channel.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns></returns>
+        /// <exception cref="IOException"></exception>
         private async ValueTask WriteChannelAsync(RoomChannel channel, CancellationToken token)
         {
             if (channel.Length > Options.MaxChannelLength) throw new IOException("Room channel too large");
@@ -191,6 +267,13 @@ namespace KolibSoft.Rooms.Core.Streams
             await WriteAsync(Blank, token);
         }
 
+        /// <summary>
+        /// Write a count.
+        /// </summary>
+        /// <param name="count">Room count.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns></returns>
+        /// <exception cref="IOException"></exception>
         private async ValueTask WriteCountAsync(RoomCount count, CancellationToken token)
         {
             if (count.Length > Options.MaxCountLength) throw new IOException("Room count too large");
@@ -204,6 +287,13 @@ namespace KolibSoft.Rooms.Core.Streams
             await WriteAsync(Blank, token);
         }
 
+        /// <summary>
+        /// Write a content.
+        /// </summary>
+        /// <param name="content">Room content.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns></returns>
+        /// <exception cref="IOException"></exception>
         private async ValueTask WriteContentAsync(Stream content, CancellationToken token)
         {
             if (content.Length > Options.MaxContentLength) throw new IOException("Room content too large");
@@ -226,6 +316,13 @@ namespace KolibSoft.Rooms.Core.Streams
             }
         }
 
+        /// <summary>
+        /// Write a message.
+        /// </summary>
+        /// <param name="message">Room message.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns></returns>
+        /// <exception cref="ObjectDisposedException"></exception>
         public async ValueTask WriteMessageAsync(RoomMessage message, CancellationToken token = default)
         {
             if (_disposed) throw new ObjectDisposedException(nameof(RoomStream));
@@ -237,6 +334,11 @@ namespace KolibSoft.Rooms.Core.Streams
             await WriteContentAsync(content, token);
         }
 
+        /// <summary>
+        /// Dipose implementation.
+        /// </summary>
+        /// <param name="disposing"></param>
+        /// <returns></returns>
         protected virtual async ValueTask OnDisposeAsync(bool disposing)
         {
             if (!_disposed)
@@ -261,6 +363,12 @@ namespace KolibSoft.Rooms.Core.Streams
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Initialize the Room stream.
+        /// </summary>
+        /// <param name="readBuffer">Read buffer.</param>
+        /// <param name="writeBuffer">Write buffer.</param>
+        /// <param name="options">Strea options.</param>
         protected RoomStream(ArraySegment<byte> readBuffer, ArraySegment<byte> writeBuffer, RoomStreamOptions? options = null)
         {
             _readBuffer = readBuffer;
@@ -268,6 +376,10 @@ namespace KolibSoft.Rooms.Core.Streams
             Options = options ?? new RoomStreamOptions();
         }
 
+        /// <summary>
+        /// Initialize the Room stream.
+        /// </summary>
+        /// <param name="options">Stream options.</param>
         protected RoomStream(RoomStreamOptions? options = null)
         {
             Options = options ?? new RoomStreamOptions();
@@ -275,14 +387,41 @@ namespace KolibSoft.Rooms.Core.Streams
             _writeBuffer = new byte[Options.WriteBuffering];
         }
 
+        /// <summary>
+        /// Internal message buffer.
+        /// </summary>
         private MemoryStream _data = new MemoryStream();
+
+        /// <summary>
+        /// Internal read buffer.
+        /// </summary>
         private ArraySegment<byte> _readBuffer = default;
+
+        /// <summary>
+        /// Internal write buffer.
+        /// </summary>
         private ArraySegment<byte> _writeBuffer = default;
+
+        /// <summary>
+        /// Internal reading position.
+        /// </summary>
         private int _position = 0;
+
+        /// <summary>
+        /// Internal reading length.
+        /// </summary>
         private int _length = 0;
+
+        /// <summary>
+        /// Internal dispose flag.
+        /// </summary>
         private bool _disposed = false;
 
+        /// <summary>
+        /// Internal blank data.
+        /// </summary>
         private static readonly byte[] Blank = Encoding.UTF8.GetBytes(" ");
 
     }
+
 }

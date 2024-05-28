@@ -9,10 +9,21 @@ using KolibSoft.Rooms.Core.Streams;
 
 namespace KolibSoft.Rooms.Core.Services
 {
+
+    /// <summary>
+    /// Room hub service.
+    /// </summary>
     public class RoomHub : RoomService
     {
 
+        /// <summary>
+        /// Amount of listening streams.
+        /// </summary>
         public int Count => _streams.Length;
+
+        /// <summary>
+        /// Listening streams.
+        /// </summary>
         protected IEnumerable<IRoomStream> Streams => _streams;
 
         protected override ValueTask OnReceiveAsync(IRoomStream stream, RoomMessage message, CancellationToken token)
@@ -57,9 +68,17 @@ namespace KolibSoft.Rooms.Core.Services
             base.Enqueue(stream, message);
         }
 
+        /// <summary>
+        /// Creates a new Room hub service.
+        /// </summary>
+        /// <param name="options">Service options.</param>
         public RoomHub(RoomServiceOptions? options = null) : base(options) { }
 
+        /// <summary>
+        /// Internal listening streams array.
+        /// </summary>
         private ImmutableArray<IRoomStream> _streams = ImmutableArray.Create<IRoomStream>();
 
     }
+
 }

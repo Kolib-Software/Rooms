@@ -5,10 +5,18 @@ using System.Threading.Tasks;
 
 namespace KolibSoft.Rooms.Core.Streams
 {
+
+    /// <summary>
+    /// Web socket based Room stream implementation.
+    /// </summary>
     public class RoomWebStream : RoomStream
     {
 
+        /// <summary>
+        /// Web socket.
+        /// </summary>
         public WebSocket Socket { get; private set; }
+
         public override bool IsAlive => !IsDisposed && Socket.State == WebSocketState.Open;
 
         protected override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken token)
@@ -35,9 +43,22 @@ namespace KolibSoft.Rooms.Core.Streams
             return buffer.Length;
         }
 
-
+        /// <summary>
+        /// Web socket based Room stream.
+        /// </summary>
+        /// <param name="socket">Web socket.</param>
+        /// <param name="readBuffer">Read buffer.</param>
+        /// <param name="writeBuffer">Write buffer.</param>
+        /// <param name="options">Stream options.</param>
         public RoomWebStream(WebSocket socket, ArraySegment<byte> readBuffer, ArraySegment<byte> writeBuffer, RoomStreamOptions? options = null) : base(readBuffer, writeBuffer, options) => Socket = socket;
+
+        /// <summary>
+        /// Web socket based Room stream.
+        /// </summary>
+        /// <param name="socket">Web socket.</param>
+        /// <param name="options">Stream options.</param>
         public RoomWebStream(WebSocket socket, RoomStreamOptions? options = null) : base(options) => Socket = socket;
 
     }
+
 }
